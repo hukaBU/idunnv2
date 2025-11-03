@@ -389,6 +389,22 @@ def get_dashboard(
         }
     }
 
+# ============ INSIGHTS (WELLNESS BRAIN) ============
+
+@api_router.get("/v1/insights")
+def get_insights(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get personalized wellness insights from the Wellness Brain (Cerveau n°1).
+    Returns a list of insights with optional product recommendations.
+    """
+    engine = rules_engine.WellnessEngine(db)
+    insights = engine.generate_insights(str(current_user.id))
+    
+    return {"insights": insights, "count": len(insights)}
+
 # ============ MARKETPLACE ============
 
 @api_router.get("/v1/products", response_model=List[schemas.ProductResponse])
