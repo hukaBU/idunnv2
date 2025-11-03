@@ -8,8 +8,11 @@ import logging
 from pathlib import Path
 from typing import List
 
-from backend.database import get_db, init_db
-from backend import models, schemas, auth, rules_engine
+from database import get_db, init_db
+import models
+import schemas
+import auth
+import rules_engine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
