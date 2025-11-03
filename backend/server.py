@@ -320,25 +320,26 @@ def chat(
     db.commit()
     db.refresh(user_message)
     
-    # CRITICAL SAFETY PROTOCOL: Check for medical trigger words
-    message_lower = message_data.message.lower()
-    for trigger_word in MEDICAL_TRIGGER_WORDS:
-        if trigger_word in message_lower:
-            # Return safety response
-            ai_message = models.ChatHistory(
-                user_id=current_user.id,
-                sender='ai',
-                message_text=SAFETY_RESPONSE
-            )
-            db.add(ai_message)
-            db.commit()
-            db.refresh(ai_message)
-            
-            return [user_message, ai_message]
+    # CRITICAL SAFETY PROTOCOL: Use enhanced safety filter
+    is_safe, safety_message = safety_filter.check_safety(message_data.message, language='en')
+    
+    if not is_safe:
+        # Return hard stop response
+        ai_message = models.ChatHistory(
+            user_id=current_user.id,
+            sender='ai',
+            message_text=safety_message
+        )
+        db.add(ai_message)
+        db.commit()
+        db.refresh(ai_message)
+        
+        logger.warning(f"Safety filter triggered for user {current_user.id}")
+        return [user_message, ai_message]
     
     # If no trigger words, generate wellness response (STUB)
     # In production, this would call OpenAI API
-    wellness_response = "That's a great wellness question! Here's my advice: Stay hydrated, get 7-9 hours of sleep, and move your body daily. Remember, I'm here to support your wellness journey!"
+    wellness_response = "C'est une excellente question de bien-être! Voici mon conseil: Restez hydraté, dormez 7-9 heures, et bougez votre corps quotidiennement. Je suis là pour soutenir votre parcours de bien-être!"
     
     ai_message = models.ChatHistory(
         user_id=current_user.id,
