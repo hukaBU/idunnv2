@@ -11,12 +11,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'expo-router';
 import axios from 'axios';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 
 export default function TrackScreen() {
   const { token } = useAuth();
+  const router = useRouter();
   const [water, setWater] = useState('');
   const [sleep, setSleep] = useState('');
   const [stress, setStress] = useState('');
