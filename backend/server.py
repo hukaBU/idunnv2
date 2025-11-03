@@ -13,6 +13,7 @@ import models
 import schemas
 import auth
 import rules_engine
+import safety_filter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
