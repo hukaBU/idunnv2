@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import UpsellModal from '../../components/UpsellModal';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 
