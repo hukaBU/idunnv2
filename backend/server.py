@@ -398,38 +398,33 @@ def get_dashboard(
 
 # ============ MARKETPLACE ============
 
+@api_router.get("/v1/products", response_model=List[schemas.ProductResponse])
+def get_all_products(db: Session = Depends(get_db)):
+    """Get all products from the marketplace"""
+    products = db.query(models.Product).order_by(models.Product.created_at.desc()).all()
+    return products
+
+@api_router.get("/v1/products/category/{category_name}", response_model=List[schemas.ProductResponse])
+def get_products_by_category(category_name: str, db: Session = Depends(get_db)):
+    """Get products filtered by category"""
+    products = db.query(models.Product).filter(
+        models.Product.category == category_name.lower()
+    ).order_by(models.Product.created_at.desc()).all()
+    return products
+
+@api_router.get("/v1/product/{product_id}", response_model=schemas.ProductResponse)
+def get_product_by_id(product_id: str, db: Session = Depends(get_db)):
+    """Get a single product by ID"""
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
+# Legacy endpoint for backwards compatibility
 @api_router.get("/v1/marketplace", response_model=List[schemas.ProductResponse])
 def get_marketplace_products(db: Session = Depends(get_db)):
-    products = db.query(models.Product).all()
-    
-    # If no products, create some sample ones
-    if not products:
-        sample_products = [
-            models.Product(
-                name="Premium Yoga Mat",
-                description="Eco-friendly yoga mat with extra cushioning",
-                image_url="https://via.placeholder.com/300x300?text=Yoga+Mat",
-                price=49.99
-            ),
-            models.Product(
-                name="Smart Water Bottle",
-                description="Tracks your hydration throughout the day",
-                image_url="https://via.placeholder.com/300x300?text=Water+Bottle",
-                price=34.99
-            ),
-            models.Product(
-                name="Sleep Meditation Guide",
-                description="Audio guide for better sleep quality",
-                image_url="https://via.placeholder.com/300x300?text=Meditation",
-                price=19.99
-            ),
-        ]
-        for product in sample_products:
-            db.add(product)
-        db.commit()
-        products = sample_products
-    
-    return products
+    """Legacy marketplace endpoint - redirects to /v1/products"""
+    return get_all_products(db)
 
 # Health check
 @api_router.get("/health")
