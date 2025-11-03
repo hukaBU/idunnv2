@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 
-from backend.database import get_db
-from backend import models
+from database import get_db
+import models
 
 load_dotenv()
 
