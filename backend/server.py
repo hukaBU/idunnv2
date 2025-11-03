@@ -39,15 +39,6 @@ app.add_middleware(
 )
 
 # Medical trigger words for safety protocol
-MEDICAL_TRIGGER_WORDS = [
-    'diabetes', 'cancer', 'medical', 'suicide', 'depression', 
-    'medicine', 'drug', 'pain', 'disease', 'illness', 'treatment',
-    'medication', 'prescription', 'diagnose', 'diagnosis', 'therapy',
-    'symptoms', 'condition', 'sick', 'doctor', 'physician'
-]
-
-SAFETY_RESPONSE = "I am a wellness assistant, not a medical professional. I cannot give advice on medical conditions. Please consult your doctor."
-
 # ============ AUTHENTICATION ENDPOINTS ============
 
 @api_router.post("/auth/register", response_model=schemas.TokenResponse)
