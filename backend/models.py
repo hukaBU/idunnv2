@@ -20,6 +20,8 @@ class User(Base):
     chat_history = relationship("ChatHistory", back_populates="user", cascade="all, delete-orphan")
     file_scans = relationship("FileScan", back_populates="user", cascade="all, delete-orphan")
     wearable_connections = relationship("WearableConnection", back_populates="user", cascade="all, delete-orphan")
+    dna_kits = relationship("DnaKit", back_populates="user")
+    blood_kits = relationship("BloodKit", back_populates="user")
 
 class UserProfile(Base):
     __tablename__ = "user_profiles"
@@ -39,7 +41,7 @@ class HealthLog(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     data_source = Column(String, nullable=False)  # 'manual', 'apple_health', 'oura', 'garmin', 'whoop', 'google_fit'
-    metric_type = Column(String, nullable=False)  # 'water_ml', 'sleep_hours', 'stress_level', 'steps', 'sleep_deep_seconds'
+    metric_type = Column(String, nullable=False)  # 'water_ml', 'steps', 'sleep_hours', 'stress_level', 'sleep_deep_seconds'
     value = Column(Float, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     
@@ -108,7 +110,7 @@ class DnaKit(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationship
-    user = relationship("User", backref="dna_kits")
+    user = relationship("User", back_populates="dna_kits")
 
 class BloodKit(Base):
     __tablename__ = "blood_kits"
@@ -122,4 +124,4 @@ class BloodKit(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationship
-    user = relationship("User", backref="blood_kits")
+    user = relationship("User", back_populates="blood_kits")
