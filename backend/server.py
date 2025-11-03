@@ -2,11 +2,11 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, UploadFi
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from typing import List, Dict
 import os
 import uuid
 import logging
 from pathlib import Path
-from typing import List
 
 from database import get_db, init_db
 import models
