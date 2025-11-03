@@ -437,6 +437,178 @@ def get_marketplace_products(db: Session = Depends(get_db)):
     """Legacy marketplace endpoint - redirects to /v1/products"""
     return get_all_products(db)
 
+# ============ COMPUTER VISION SCANNERS ============
+
+@api_router.post("/v1/scan/food")
+async def scan_food(
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Food Scanner: Recognize food items from image using CV.
+    Returns detected food items with quantities and calories.
+    """
+    try:
+        # Read image data
+        image_data = await file.read()
+        
+        # Validate image size (max 10MB)
+        if len(image_data) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Image too large (max 10MB)")
+        
+        # Run AI recognition
+        detected_foods = food_recognition.food_ai.recognize_food(image_data)
+        
+        # Analyze nutrition
+        nutrition_analysis = food_recognition.food_ai.analyze_nutrition(detected_foods)
+        
+        # Save to FileScan for history
+        scan_id = str(uuid.uuid4())
+        file_path = UPLOADS_DIR / f"{scan_id}_food_scan.jpg"
+        
+        with open(file_path, "wb") as f:
+            f.write(image_data)
+        
+        file_scan = models.FileScan(
+            user_id=current_user.id,
+            file_type='food_scan',
+            storage_path=str(file_path)
+        )
+        db.add(file_scan)
+        db.commit()
+        
+        logger.info(f"Food scan completed for user {current_user.id}: {len(detected_foods)} items detected")
+        
+        return {
+            "scan_id": str(file_scan.id),
+            "detected_foods": detected_foods,
+            "nutrition": nutrition_analysis,
+            "timestamp": datetime.utcnow().isoformat(),
+            "note": "STUB: Using simulated AI. In production, integrate LogMeal.ai, Clarifai, or custom model."
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Food scan error: {e}")
+        raise HTTPException(status_code=500, detail="Food recognition failed")
+
+@api_router.post("/v1/scan/food/confirm")
+def confirm_food_scan(
+    scan_id: str,
+    confirmed_foods: List[Dict],
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Confirm and save food scan results to HealthLog.
+    User can edit detected items before confirmation.
+    """
+    try:
+        # Validate scan exists
+        scan = db.query(models.FileScan).filter(
+            models.FileScan.id == scan_id,
+            models.FileScan.user_id == current_user.id
+        ).first()
+        
+        if not scan:
+            raise HTTPException(status_code=404, detail="Scan not found")
+        
+        # Save each food item as a health log entry
+        total_calories = 0
+        for food in confirmed_foods:
+            # Create health log for this food item
+            health_log = models.HealthLog(
+                user_id=current_user.id,
+                data_source='food_scanner',
+                metric_type='food_intake',
+                value=food.get('qty_g', 0),
+                timestamp=datetime.utcnow()
+            )
+            db.add(health_log)
+            total_calories += food.get('calories', 0)
+        
+        # Also log total calories
+        calorie_log = models.HealthLog(
+            user_id=current_user.id,
+            data_source='food_scanner',
+            metric_type='calories',
+            value=total_calories,
+            timestamp=datetime.utcnow()
+        )
+        db.add(calorie_log)
+        
+        db.commit()
+        
+        logger.info(f"Food scan confirmed for user {current_user.id}: {len(confirmed_foods)} items, {total_calories} cal")
+        
+        return {
+            "message": "Food intake logged successfully",
+            "items_logged": len(confirmed_foods),
+            "total_calories": total_calories
+        }
+        
+    except Exception as e:
+        logger.error(f"Food confirmation error: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to log food intake")
+
+@api_router.post("/v1/scan/skin")
+async def scan_skin(
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Skin Scanner: Analyze skin wellness metrics (NOT medical diagnosis).
+    Returns hydration, pore visibility, fine lines, etc.
+    CRITICAL: Wellness-only metrics, no medical conditions.
+    """
+    try:
+        # Read image data
+        image_data = await file.read()
+        
+        # Validate image size (max 10MB)
+        if len(image_data) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Image too large (max 10MB)")
+        
+        # Run AI analysis
+        skin_analysis_result = skin_analysis.skin_ai.analyze_skin(image_data)
+        skin_analysis_result['timestamp'] = datetime.utcnow().isoformat()
+        
+        # SAFETY CHECK: Validate wellness-only metrics
+        skin_analysis.skin_ai.validate_wellness_only(skin_analysis_result)
+        
+        # Save to FileScan for history
+        scan_id = str(uuid.uuid4())
+        file_path = UPLOADS_DIR / f"{scan_id}_skin_scan.jpg"
+        
+        with open(file_path, "wb") as f:
+            f.write(image_data)
+        
+        file_scan = models.FileScan(
+            user_id=current_user.id,
+            file_type='skin_scan',
+            storage_path=str(file_path)
+        )
+        db.add(file_scan)
+        db.commit()
+        
+        logger.info(f"Skin scan completed for user {current_user.id}")
+        
+        return {
+            "scan_id": str(file_scan.id),
+            "analysis": skin_analysis_result,
+            "note": "STUB: Using simulated AI. In production, integrate Haut.ai, Perfect Corp, or custom model."
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Skin scan error: {e}")
+        raise HTTPException(status_code=500, detail="Skin analysis failed")
+
 # Health check
 @api_router.get("/health")
 def health_check():
