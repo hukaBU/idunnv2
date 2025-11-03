@@ -76,8 +76,12 @@ class ProductResponse(BaseModel):
     id: uuid.UUID
     name: str
     description: Optional[str]
+    short_description: Optional[str]
     image_url: Optional[str]
     price: float
+    category: str
+    partner_url: str
+    is_vetted: bool
     
     class Config:
         from_attributes = True
