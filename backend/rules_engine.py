@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend import models
+import models
 from datetime import datetime, timedelta
 
 def get_wellness_insight(user_id: str, db: Session):
