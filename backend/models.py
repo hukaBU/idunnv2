@@ -64,8 +64,12 @@ class Product(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
     description = Column(Text)
+    short_description = Column(String)
     image_url = Column(String)
     price = Column(Float, nullable=False)
+    category = Column(String, nullable=False, index=True)  # 'sleep', 'energy', 'skin', 'fitness'
+    partner_url = Column(String, nullable=False)
+    is_vetted = Column(Integer, default=1)  # 1 = true, 0 = false
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class FileScan(Base):
