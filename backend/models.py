@@ -95,3 +95,31 @@ class WearableConnection(Base):
     
     # Relationship
     user = relationship("User", back_populates="wearable_connections")
+
+class DnaKit(Base):
+    __tablename__ = "dna_kits"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=True, index=True)
+    kit_serial_id = Column(String, unique=True, nullable=False, index=True)  # e.g., "IDUNN-DNA-12345"
+    status = Column(String, default='pending', nullable=False)  # 'pending', 'registered', 'processing', 'completed'
+    registered_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    user = relationship("User", backref="dna_kits")
+
+class BloodKit(Base):
+    __tablename__ = "blood_kits"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=True, index=True)
+    kit_serial_id = Column(String, unique=True, nullable=False, index=True)  # e.g., "IDUNN-BLOOD-12345"
+    status = Column(String, default='pending', nullable=False)  # 'pending', 'registered', 'processing', 'completed'
+    registered_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    user = relationship("User", backref="blood_kits")
