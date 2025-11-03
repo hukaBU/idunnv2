@@ -168,43 +168,12 @@ export default function ConnectScreen() {
       </ScrollView>
 
       {/* Upgrade Modal */}
-      <Modal
+      <UpsellModal
         visible={upgradeModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setUpgradeModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Ionicons name="lock-closed" size={48} color="#F59E0B" />
-            <Text style={styles.modalTitle}>Upgrade Required</Text>
-            <Text style={styles.modalText}>
-              Free tier allows only 1 wearable connection.
-            </Text>
-            <Text style={styles.modalText}>
-              Upgrade to <Text style={styles.modalBold}>Connect</Text> tier for unlimited wearable
-              connections!
-            </Text>
-
-            <TouchableOpacity
-              style={styles.modalButtonPrimary}
-              onPress={() => {
-                setUpgradeModalVisible(false);
-                router.push('/(tabs)/profile');
-              }}
-            >
-              <Text style={styles.modalButtonPrimaryText}>Upgrade Now</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalButtonSecondary}
-              onPress={() => setUpgradeModalVisible(false)}
-            >
-              <Text style={styles.modalButtonSecondaryText}>Maybe Later</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setUpgradeModalVisible(false)}
+        currentTier={user?.tier || 'free'}
+        triggeredFeature={selectedWearable ? `Connexion ${selectedWearable}` : undefined}
+      />
     </SafeAreaView>
   );
 }
