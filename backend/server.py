@@ -14,6 +14,8 @@ import schemas
 import auth
 import rules_engine
 import safety_filter
+import food_recognition
+import skin_analysis
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
