@@ -65,6 +65,23 @@ export default function TrackScreen() {
           <Text style={styles.subtitle}>Log your daily health metrics</Text>
         </View>
 
+        {/* AI Food Scanner */}
+        <TouchableOpacity
+          style={styles.scannerCard}
+          onPress={() => router.push('/food-scanner')}
+        >
+          <View style={styles.scannerIcon}>
+            <Ionicons name="camera" size={32} color="#fff" />
+          </View>
+          <View style={styles.scannerContent}>
+            <Text style={styles.scannerTitle}>Scanner un Repas</Text>
+            <Text style={styles.scannerSubtitle}>
+              IA: Reconnaissance automatique des aliments
+            </Text>
+          </View>
+          <Ionicons name="arrow-forward" size={24} color="#4F46E5" />
+        </TouchableOpacity>
+
         {/* Water Intake */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
